@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Tile Set Maker</title>
+    <style>
+        canvas#output {
+            border: 1px solid black;
+        }
+        input#importMapFile {
+            visibility: hidden;
+            height: 0px;
+            padding: 0px;
+            width: 0px;
+            margin: 0px;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <h3><a href="./todo.html">TODO List</a> | <a href="./index.html">Main</a></h3>
+    <input id="imageFile" type="file" /><input id="w" type="number" value="16" max="99" min="1"/>&times;<input id="h" type="number" value="16" max="99" min="1"/><br>
+    <input type="button" id="toggleGrid" value="Hide Output Grid"/><input type="button" id="clearOutput" value="Clear Tileset"/><input type="button" id="saveSet" value="Save Tileset"/>
+    <input type="file" id="importMapFile"/><input type="button" id="importMapButton" value="Import Mapping"/><br>
+    <canvas id="showImage"></canvas><br>
+    <canvas id="output" width="480" height="320"></canvas>
+    <script>
+        const getById = document.getElementById.bind(document);
+        const image = new Image();
+        const [fileIn, wIn, hIn, toggleGridBtn, clearOutputBtn, saveBtn, mapFileIn, mapBtn] = ['imageFile', 'w', 'h', 'toggleGrid', 'clearOutput', 'saveSet', 'importMapFile', 'importMapButton'].map(getById);
+        const [showOut, output] = ['showImage', 'output'].map(getById);
+        const [showCtx, outputCtx] = [showOut, output].map(canvas => canvas.getContext('2d'));
+        let [selectX, selectY] = [-1, -1];
+        let tiles = [];
+        let isGridDrawn = true;
+        mapBtn.addEventListener('click', () => {
+            if (image && image.src) {
+                mapFileIn.click();
+            } else {
+                alert('You must load an image for the tile set first.');
+            }
+        });
+        mapFileIn.addEventListener('change', () => {
+            const reader = new FileReader();
+            reader.addEventListener('load', () => {
+                const json = JSON.parse(reader.result);
+                if (json && json.tiles && Array.isArray(json.tiles)) {
+                    tiles = json.tiles.map(row => {
+                        if (!row) { return []; }
+                        return row.map(tile => {
+                            return tile ? {x: Math.floor(tile.x / json.tileSize[0]), y: Math.floor(tile.y / json.tileSize[1])} : tile;
+                        });
+                    });
+                    drawOutput();
+                }
+            });
+            reader.readAsText(mapFileIn.files[0]);
+        });
+        saveBtn.addEventListener('click', () => {
+            const tileSize = [+wIn.value || 0, +hIn.value || 0];
+            const fn = fileIn.value.split(/[\\\/]/).pop();
+            const imageUrl = `../tilesets/${fn}`;
+            const mappedTiles = tiles.map(row => {
+                if (row.every(entry => !entry)) {
+                    return null;
+                }
+                return row.map(tile => {
+                    return tile ? {x: tile.x * tileSize[0], y: tile.y * tileSize[1]} : tile;
+                });
+            });
+            const json = {
+                imageUrl,
+                tileSize,
+                tiles: mappedTiles
+            };
+            
+            const blob = new Blob([JSON.stringify(json, null, 4)], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fn.replace(/\..*$/, '.json');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+        clearOutputBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear the entire tile set?')) {
+                tiles = [];
+                drawOutput();
+            }
+        });
+        const drawImagePicker = function() {
+            this.removeEventListener('load', drawImagePicker);
+            if (this && this.src && this.width && this.height) {
+                showOut.width = this.width;
+                showOut.height = this.height;
+                showCtx.drawImage(this, 0, 0);
+                drawGrid(showOut, showCtx);
+            }
+            drawOutput();
+        }
+        const redraw = drawImagePicker.bind(image);
+        const drawOutput = function() {
+            const [w,h] = [+wIn.value || 0, +hIn.value || 0];
+            outputCtx.clearRect(0, 0, output.width, output.height);
+            for (let y = 0; y < tiles.length; ++y) {
+                for (let x = 0; x < tiles[y].length; ++x) {
+                    const tile = tiles[y][x];
+                    if (tile) {
+                        outputCtx.drawImage(image, tile.x * w, tile.y * h, w, h, x * w, y * h, w, h);
+                    }
+                }
+            }
+            if (isGridDrawn) {
+                drawGrid(output, outputCtx, false);
+            }
+        }
+        toggleGridBtn.addEventListener('click', () => {
+            isGridDrawn = !isGridDrawn;
+            drawOutput();
+            toggleGridBtn.value = isGridDrawn ? 'Hide Output Grid' : 'Show Output Grid';
+        });
+        const drawGrid = function(canv, ctx, drawSelection = true) {
+            const [w,h] = [+wIn.value || 0, +hIn.value || 0];
+            ctx.strokeStyle = '#000000';
+            for (let x = 0; x < canv.width; x += w) {
+                for (let y = 0; y < canv.height; y += h) {
+                    ctx.strokeRect(x, y, w, h);
+                }
+            }
+            ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+            if (drawSelection && selectX >= 0 && selectY >= 0) {
+                ctx.fillRect(selectX * w, selectY * h, w, h);
+            }
+        }
+        const selectTile = (x,y) => {
+            if (x === selectX && y === selectY) {
+                selectX = -1;
+                selectY = -1;
+            } else {
+                selectX = x;
+                selectY = y;
+            }
+            redraw();
+        }
+        image.addEventListener('error', er => console.error(er));
+        fileIn.addEventListener('change', ev => {
+            const reader = new FileReader();
+            reader.addEventListener('load', () => {
+                image.addEventListener('load', drawImagePicker);
+                image.src = reader.result;
+            });
+            reader.readAsDataURL(fileIn.files[0]);
+        });
+
+        wIn.addEventListener('change', redraw);
+        hIn.addEventListener('change', redraw);
+        showOut.addEventListener('click', ev => {
+            const [w,h] = [+wIn.value || 0, +hIn.value || 0];
+            const [x, y] = [ev.clientX - showOut.offsetLeft, ev.clientY - showOut.offsetTop];
+            selectTile(Math.floor(x/w), Math.floor(y/h));
+        });
+        const placeTile = (x,y, type) => {
+            const row = tiles[y] || [];
+            if (type === 1) {
+                row[x] = {x: selectX, y: selectY};
+            } else if (type === 2) {
+                row[x] = null;
+            } else {
+                return;
+            }
+            for (let yy = 0; yy <= y; ++yy) {
+                tiles[yy] = tiles[yy] || [];
+                for (let xx = 0; xx < x; ++xx) {
+                    tiles[yy][xx] = tiles[yy][xx] || null;
+                }
+            }
+            tiles[y] = row;
+            drawOutput();
+        };
+        output.addEventListener('mousemove', ev => {
+            const [w,h] = [+wIn.value || 0, +hIn.value || 0];
+            const [x, y] = [ev.clientX - output.offsetLeft, ev.clientY - output.offsetTop];
+            placeTile(Math.floor(x/w), Math.floor(y/h), ev.buttons);
+        });
+        output.addEventListener('mousedown', ev => {
+            const [w,h] = [+wIn.value || 0, +hIn.value || 0];
+            const [x, y] = [ev.clientX - output.offsetLeft, ev.clientY - output.offsetTop];
+            placeTile(Math.floor(x/w), Math.floor(y/h), ev.buttons);
+        });
+        output.addEventListener('contextmenu', ev => {
+            ev.preventDefault();
+            ev.cancelBubble = true;
+            return false;
+        });
+
+        drawOutput();
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+canvas#gameScreen {
+    border: 0px;
+    margin: 0px;
+    width: 480px;
+    height: 320px;
+}
