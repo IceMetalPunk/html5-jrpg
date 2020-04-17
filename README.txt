@@ -31,10 +31,18 @@ Secondary focus: Protection effects, blocking opponent moves
 -------------------
 
 Types:
-Mind, Body, Specter (supernatural creatures), Nature, Artifice, Arcane
+Mind, Body, Specter (supernatural creatures), Nature, Artifice
 
-Two non-transitive loops for balance:
-Arcane > Specter > Mind > Arcane
-Artifice > Nature > Body > Artifice
+A non-transitive loop for balance (explanations thanks to SapphireFlame on Stack Exchange!):
 
-(Don't ask why Body > Artifice, I don't know, but it must be for mechanical balance!)
+Artifice > Mind > Specter > Body > Nature > Artifice
+
+Artifice > Mind: The Mind type messes with others' brains directly, so have a natural disadvantage against Artifice types who use advanced technology that augments their brains in ways Mind types aren't adapted to working with.
+
+Mind > Specter: Specter types don't have very solid physical bodies, meaning they are mostly just minds loosely holding particles together with self-directed psychic powers. Mental manipulation can therefore easily target them and also disrupt their entire being.
+
+Specter > Body: Specters have a natural advantage against Body types mainly because they rely on raw strength and physical attacks which go through the Specters' loose physical form (like trying to punch a cloud).
+
+Body > Nature: Nature types have low resistance against brute force attacks as they rely on external sheilding often far from themselves as opposed to actual worn armor, and don't generally build their own bodies up. Body types can generally shrug off terrain manipulation attacks (which would boil down to being fairly physical such as rock smashes and earth spikes) and plant-based attacks (they can rip through them), and their big bulk should withstand wind attacks and cold attacks.
+
+Nature > Artifice: No amount of tech can stand up to the true force of Nature. Lightning will fry electronics, alternate cold and heat will break metals, crushing something between multiple tons of rock will break anything that otherwise refuses to be broken.
