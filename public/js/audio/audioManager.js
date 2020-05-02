@@ -1,16 +1,13 @@
+const sounds = new Map();
 class AudioManager {
-    constructor() {
-        this.sounds = new Map();
-    }
-
     load(name, url, loop = false) {
-        if (this.sounds.has(name)) {
-            return Promise.resolve(this.sounds.get(name));
+        if (sounds.has(name)) {
+            return Promise.resolve(sounds.get(name));
         }
         return new Promise((res, rej) => {
             const sound = new Audio();
             sound.oncanplaythrough = () => {
-                this.sounds.set(name, sound);
+                sounds.set(name, sound);
                 sound.loop = loop;
                 res(sound);
             };
@@ -19,7 +16,7 @@ class AudioManager {
         });
     }
     get(name) {
-        return this.sounds.get(name);
+        return sounds.get(name);
     }
     async playSound(name) {
         const sound = this.get(name);

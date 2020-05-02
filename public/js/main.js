@@ -1,5 +1,5 @@
 import imageRenderer from './render/imageRenderer.js';
-import audioManager from './audio/audioManager.js';
+import AudioManager from './audio/audioManager.js';
 import Sprite from './render/sprite.js';
 import {SPRITES, AUDIO, TILESETS} from './constants.js';
 import {SPRITE_DEFS, AUDIO_DEFS, TILESET_DEFS} from './assets.js';
@@ -44,7 +44,7 @@ const loadSounds = async function() {
     for (let i = 0; i < audioList.length; ++i) {
         const name = audioList[i];
         const def = AUDIO_DEFS[name];
-        const audio = await audioManager.load(def.name, def.url, def.loop);
+        const audio = await AudioManager.load(def.name, def.url, def.loop);
         drawLoadingScreen(`Loading audio (${Math.round(100*(i + 1)/audioList.length)}%)... Please wait...`)
         AUDIO[name] = audio;
     }
@@ -72,7 +72,7 @@ const setup = async function() {
     drawLoadingScreen('Loading tiles... Please wait...');
     await loadTileSets();
 
-    audioManager.playSound('MAIN_BGM');
+    AudioManager.playSound('MAIN_BGM');
     const char = new Character(gameScreen.width/2, gameScreen.height/2);
     game.entities.push(char);
     game.start();

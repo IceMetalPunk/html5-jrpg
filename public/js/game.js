@@ -1,7 +1,7 @@
-import {TILESETS} from './constants.js';
-import Camera from './render/camera.js';
+import AudioManager from './audio/audioManager.js';
+import { TILESETS } from './constants.js';
 import InputManager from './input/inputManager.js';
-import audioManager from './audio/audioManager.js';
+import Camera from './render/camera.js';
 
 class Game {
     constructor(canv, ctx) {
@@ -31,7 +31,7 @@ class Game {
     start(fps = 30) {
         this.inputs.mouse.listen('press', button => {
             if (button === 0) {
-                audioManager.playSound('SWORD');
+                AudioManager.playSound('SWORD');
             }
         });
         this.stop();

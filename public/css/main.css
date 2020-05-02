@@ -1,5 +1,5 @@
 canvas#gameScreen {
-    border: 0px;
+    border: 1px solid black;
     margin: 0px;
     width: 480px;
     height: 320px;

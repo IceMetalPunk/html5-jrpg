@@ -1,12 +1,12 @@
+const keys = new Set();
+const keyListeners = {
+    press: [],
+    release: []
+};
 class KeyboardManager {
     constructor() {
-        this.keys = new Set();
         this.pressFn = this.press.bind(this);
         this.releaseFn = this.release.bind(this);
-        this.listeners = {
-            press: [],
-            release: []
-        };
         this.attach();
     }
     attach() {
@@ -18,50 +18,49 @@ class KeyboardManager {
         document.removeEventListener('keyup', this.releaseFn);
     }
     isPressed(key) {
-        return this.keys.has(key);
+        return keys.has(key);
     }
     listen(type, cb) {
-        this.listeners[type].push(cb);
+        keyListeners[type].push(cb);
     }
     unlisten(type, cb) {
-        this.listeners[type] = this.listeners[type].filter(fn => fn !== cb);
+        keyListeners[type] = keyListeners[type].filter(fn => fn !== cb);
     }
     fireListeners(type, key) {
-        this.listeners[type].forEach(cb => cb(key));
+        keyListeners[type].forEach(cb => cb(key));
     }
     press(ev) {
         if (!this.isPressed(ev.key)) {
             this.fireListeners('press', ev.key);
         }
-        this.keys.add(ev.key);
+        keys.add(ev.key);
     }
     release(ev) {
         if (this.isPressed(ev.key)) {
             this.fireListeners('release', ev.key);
         }
-        this.keys.delete(ev.key);
+        keys.delete(ev.key);
     }
 };
 
+const buttons = new Set();
+const mouseListeners = {
+    press: [],
+    release: []
+};
+let [mouseX, mouseY] = [null, null];
 class MouseManager {
     constructor(canvas) {
-        this.buttons = new Set();
         this.pressFn = this.press.bind(this);
         this.releaseFn = this.release.bind(this);
         this.moveFn = this.mouseMove.bind(this);
         this.canvas = canvas;
-        this.mouseX = null;
-        this.mouseY = null;
-        this.listeners = {
-            press: [],
-            release: []
-        };
         if (canvas) {
             this.attach(canvas);
         }
     }
     get pos() {
-        return {x: this.mouseX, y: this.mouseY};
+        return {x: mouseX, y: mouseY};
     }
     attach(canvas) {
         if (canvas) {
@@ -78,38 +77,38 @@ class MouseManager {
         }
     }
     isPressed(button) {
-        return this.buttons.has(button);
+        return buttons.has(button);
     }
     listen(type, cb) {
-        this.listeners[type].push(cb);
+        mouseListeners[type].push(cb);
     }
     unlisten(type, cb) {
-        this.listeners[type] = this.listeners[type].filter(fn => fn !== cb);
+        mouseListeners[type] = mouseListeners[type].filter(fn => fn !== cb);
     }
     fireListeners(type, button) {
-        this.listeners[type].forEach(cb => cb(button));
+        mouseListeners[type].forEach(cb => cb(button));
     }
     press(ev) {
         if (!this.isPressed(ev.button)) {
             this.fireListeners('press', ev.button);
         }
-        this.buttons.add(ev.button);
+        buttons.add(ev.button);
     }
     release(ev) {
         if (this.isPressed(ev.button)) {
             this.fireListeners('release', ev.button);
         }
-        this.buttons.delete(ev.button);
+        buttons.delete(ev.button);
     }
     mouseMove(ev) {
-        this.mouseX = ev.offsetX;
-        this.mouseY = ev.offsetY;
+        mouseX = ev.offsetX;
+        mouseY = ev.offsetY;
     }
 };
 
 export default class InputManager {
     constructor(canvas) {
-        this.keyboard = new KeyboardManager(canvas);
+        this.keyboard = new KeyboardManager();
         this.mouse = new MouseManager(canvas);
         this.canvas = canvas;
     }
