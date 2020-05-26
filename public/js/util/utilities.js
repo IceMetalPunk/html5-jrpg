@@ -34,6 +34,15 @@ export default {
     translate: (section, key, lang) {
         return translations[lang || currentLang][section][key];
     },
+    sum: (arr, key) => {
+        if (key) {
+            arr = arr.map(entry => entry[key]);
+        }
+        return arr.reduce((sum, entry) => sum + entry, 0);
+    },
+    average: function(arr, key) {
+        return this.sum(arr, key) / arr.length;
+    },
     random: () => {
         randomCounter = (randomCounter + 1) % randomCache.length;
         if (randomCounter <= 0) {
