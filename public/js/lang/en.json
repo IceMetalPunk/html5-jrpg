@@ -1,0 +1,8 @@
+{
+    "cutscenes": {
+        "main": [
+            "Welcome to a place called Castor or Pollux! This is a test of internationalization.",
+            "It should support multiple lines as long as we do things right."
+        ]
+    }
+}
